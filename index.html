@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Type of the Dead - Zombie Typing Defense</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="game">
+  <div id="stars"></div>
+
+  <div id="hud">
+    <div class="hud-item">Level <span id="level">1</span></div>
+    <div class="hud-item">Score <span id="score">0</span></div>
+    <div class="hud-item">Wave <span id="wave-progress">0</span>/<span id="wave-total">10</span></div>
+    <div class="hud-item">WPM <span id="wpm">0</span></div>
+    <div class="hud-item">Accuracy <span id="accuracy">100</span>%</div>
+  </div>
+
+  <div id="hp-bar-wrap">
+    <div id="hp-bar"></div>
+    <div id="hp-text">100 / 100</div>
+  </div>
+
+  <div id="arena">
+    <div id="moon"></div>
+    <div id="ground"></div>
+    <div id="castle">
+      <div id="castle-flag">🚩</div>
+      <div id="castle-body">🏰</div>
+      <div id="hero">🧙</div>
+    </div>
+    <div id="monsters"></div>
+    <div id="effects"></div>
+  </div>
+
+  <div id="typed-display">
+    <span id="typed-text"></span>
+    <span id="typed-cursor">|</span>
+  </div>
+
+  <div id="overlay" class="screen">
+    <div class="panel">
+      <h1>🧟 Type of the Dead 🏰</h1>
+      <p class="tagline">Defend the castle by typing the words on the monsters before they reach you!</p>
+
+      <div class="howto">
+        <div><b>How to play</b></div>
+        <ul>
+          <li>Type the word floating above each monster.</li>
+          <li>The monster you started typing turns <span class="hl">yellow</span>.</li>
+          <li>Finish a word to <span class="zap">⚡ZAP⚡</span> it!</li>
+          <li>Don't let monsters reach the castle!</li>
+        </ul>
+        <div class="powerups-help">
+          <b>Power-ups:</b>
+          <span title="Freeze">❄️ freeze</span> ·
+          <span title="Bomb">💣 bomb</span> ·
+          <span title="Heal">💖 heal</span>
+        </div>
+      </div>
+
+      <div class="difficulty">
+        <div><b>Choose difficulty</b></div>
+        <div class="diff-buttons">
+          <button class="btn" data-diff="easy">Easy 🟢</button>
+          <button class="btn" data-diff="medium">Medium 🟡</button>
+          <button class="btn" data-diff="hard">Hard 🔴</button>
+        </div>
+      </div>
+
+      <div class="best">High Score: <span id="best-score">0</span></div>
+    </div>
+  </div>
+
+  <div id="level-banner" class="banner hidden"></div>
+  <div id="game-over" class="screen hidden">
+    <div class="panel">
+      <h1>💀 Game Over 💀</h1>
+      <p>The monsters got past your defenses!</p>
+      <p>Final Score: <span id="final-score">0</span></p>
+      <p>Level Reached: <span id="final-level">1</span></p>
+      <button class="btn" id="play-again">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<script src="words.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
