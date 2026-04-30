@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>Type of the Dead - Zombie Typing Defense</title>
 <link rel="stylesheet" href="style.css" />
 </head>
@@ -38,6 +41,17 @@
   <div id="typed-display">
     <span id="typed-text"></span>
     <span id="typed-cursor">|</span>
+  </div>
+
+  <input id="key-capture" type="text" autocomplete="off" autocorrect="off"
+         autocapitalize="off" spellcheck="false" inputmode="text"
+         aria-label="Type words here" />
+
+  <div id="rotate-hint" class="screen hidden">
+    <div class="panel">
+      <h1>🔄</h1>
+      <p>Please rotate your device to <b>landscape</b> to play.</p>
+    </div>
   </div>
 
   <div id="overlay" class="screen">

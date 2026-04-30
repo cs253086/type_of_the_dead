@@ -367,11 +367,19 @@
     }
   }
 
+  // ===== Input: hardware keyboard + soft keyboard via hidden input =====
+  const keyInput = $('key-capture');
+  const isTouch =
+    ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
+    window.matchMedia('(pointer: coarse)').matches;
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && state.running) {
       state.paused = !state.paused;
       return;
     }
+    // On touch, the hidden input handles letters/backspace via beforeinput.
+    if (isTouch && e.target === keyInput) return;
     if (e.key === 'Backspace') {
       e.preventDefault();
       if (state.running) handleBackspace();
@@ -379,6 +387,51 @@
     }
     if (e.key.length === 1) handleKey(e.key);
   });
+
+  // Soft-keyboard path (iPad without external keyboard, phones, etc.)
+  keyInput.addEventListener('beforeinput', e => {
+    if (!state.running) { e.preventDefault(); keyInput.value = ''; return; }
+    if (e.inputType === 'insertText' && e.data) {
+      for (const ch of e.data) handleKey(ch);
+    } else if (e.inputType === 'deleteContentBackward') {
+      handleBackspace();
+    }
+    e.preventDefault();
+    keyInput.value = '';
+  });
+  // Some Android keyboards bypass beforeinput; mop up via input event.
+  keyInput.addEventListener('input', () => {
+    const v = keyInput.value;
+    if (v && state.running) for (const ch of v) handleKey(ch);
+    keyInput.value = '';
+  });
+
+  // Keep the soft keyboard up: refocus when the user taps elsewhere.
+  function focusKeyInput() {
+    if (!state.running) return;
+    try { keyInput.focus({ preventScroll: true }); } catch (_) { keyInput.focus(); }
+  }
+  document.addEventListener('touchend', e => {
+    if (e.target.closest('button')) return; // don't steal taps from buttons
+    focusKeyInput();
+  });
+  document.addEventListener('click', e => {
+    if (!isTouch) return;
+    if (e.target.closest('button')) return;
+    focusKeyInput();
+  });
+
+  // ===== Orientation handling =====
+  const rotateHint = $('rotate-hint');
+  function checkOrientation() {
+    const portrait = window.innerHeight > window.innerWidth;
+    const small = Math.min(window.innerWidth, window.innerHeight) < 900;
+    const needHint = portrait && small;
+    rotateHint.classList.toggle('hidden', !needHint);
+  }
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', checkOrientation);
+  checkOrientation();
 
   // ===== Game loop =====
   let lastT = 0;
@@ -450,6 +503,8 @@
     state.running = true;
     showBanner('Level 1 — Defend!', 1800);
     updateHUD();
+    checkOrientation();
+    if (isTouch) focusKeyInput();
     lastT = performance.now();
     requestAnimationFrame(loop);
   }
@@ -471,7 +526,12 @@
 
   // ===== Buttons =====
   document.querySelectorAll('[data-diff]').forEach(btn => {
-    btn.addEventListener('click', () => startGame(btn.dataset.diff));
+    btn.addEventListener('click', e => {
+      // Focus the hidden input synchronously inside the user gesture so iOS
+      // pops up the soft keyboard.
+      if (isTouch) keyInput.focus();
+      startGame(btn.dataset.diff);
+    });
   });
 
   $('play-again').addEventListener('click', () => {
