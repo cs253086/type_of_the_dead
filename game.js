@@ -354,17 +354,30 @@
     }
   }
 
+  function handleBackspace() {
+    const m = state.activeMonster;
+    if (!m || m.typedIdx === 0) return;
+    m.typedIdx--;
+    m.updateWordDisplay();
+    state.typed = state.typed.slice(0, -1);
+    typedText.textContent = state.typed;
+    if (m.typedIdx === 0) {
+      m.setActive(false);
+      state.activeMonster = null;
+    }
+  }
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && state.running) {
       state.paused = !state.paused;
       return;
     }
-    if (e.key.length === 1) handleKey(e.key);
-    if (e.key === 'Backspace' && state.activeMonster) {
-      // No-op: typing momentum is more fun than allowing backspace.
-      // Block default to prevent browser navigation in some setups.
+    if (e.key === 'Backspace') {
       e.preventDefault();
+      if (state.running) handleBackspace();
+      return;
     }
+    if (e.key.length === 1) handleKey(e.key);
   });
 
   // ===== Game loop =====
