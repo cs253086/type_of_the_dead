@@ -368,6 +368,17 @@ html, body {
 
 @keyframes blink { to { visibility: hidden; } }
 
+#typed-text.miss {
+  color: #ff5555;
+  animation: miss-shake 0.25s;
+}
+
+@keyframes miss-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
 /* Screens */
 .screen {
   position: absolute;

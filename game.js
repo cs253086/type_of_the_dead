@@ -316,6 +316,17 @@
   }
 
   // ===== Input =====
+  let missTimer = 0;
+  function flashMiss(ch) {
+    typedText.textContent = ch;
+    typedText.classList.add('miss');
+    clearTimeout(missTimer);
+    missTimer = setTimeout(() => {
+      typedText.classList.remove('miss');
+      typedText.textContent = state.typed;
+    }, 280);
+  }
+
   function handleKey(ch) {
     if (!state.running) return;
     if (!/^[a-zA-Z]$/.test(ch)) return;
@@ -327,7 +338,10 @@
       const candidates = state.monsters
         .filter(m => m.word[m.typedIdx] === lower)
         .sort((a, b) => a.x - b.x);
-      if (candidates.length === 0) return;
+      if (candidates.length === 0) {
+        flashMiss(ch);
+        return;
+      }
       const m = candidates[0];
       state.activeMonster = m;
       m.setActive(true);
@@ -336,9 +350,11 @@
     const m = state.activeMonster;
     const result = m.typeChar(lower);
     if (result === 'wrong') {
-      // mistype on active word - count missed but keep lock
+      flashMiss(ch);
       return;
     }
+    clearTimeout(missTimer);
+    typedText.classList.remove('miss');
     state.correctChars++;
     state.typed += lower;
     typedText.textContent = state.typed;
