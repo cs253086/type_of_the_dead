@@ -373,37 +373,49 @@
     ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
     window.matchMedia('(pointer: coarse)').matches;
 
+  // Track the most recent hardware-keyboard event so we can dedupe the
+  // soft-keyboard path that fires for the same physical keypress on iPad.
+  let lastHwTime = 0;
+  function markHardware() { lastHwTime = performance.now(); }
+  function recentlyHandledByHardware() {
+    return performance.now() - lastHwTime < 120;
+  }
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && state.running) {
       state.paused = !state.paused;
       return;
     }
-    // On touch, the hidden input handles letters/backspace via beforeinput.
-    if (isTouch && e.target === keyInput) return;
     if (e.key === 'Backspace') {
       e.preventDefault();
       if (state.running) handleBackspace();
+      markHardware();
       return;
     }
-    if (e.key.length === 1) handleKey(e.key);
+    if (e.key.length === 1) {
+      handleKey(e.key);
+      markHardware();
+    }
   });
 
   // Soft-keyboard path (iPad without external keyboard, phones, etc.)
   keyInput.addEventListener('beforeinput', e => {
-    if (!state.running) { e.preventDefault(); keyInput.value = ''; return; }
+    e.preventDefault();
+    keyInput.value = '';
+    if (!state.running) return;
+    if (recentlyHandledByHardware()) return;
     if (e.inputType === 'insertText' && e.data) {
       for (const ch of e.data) handleKey(ch);
     } else if (e.inputType === 'deleteContentBackward') {
       handleBackspace();
     }
-    e.preventDefault();
-    keyInput.value = '';
   });
-  // Some Android keyboards bypass beforeinput; mop up via input event.
+  // Fallback for keyboards that bypass beforeinput.
   keyInput.addEventListener('input', () => {
     const v = keyInput.value;
-    if (v && state.running) for (const ch of v) handleKey(ch);
     keyInput.value = '';
+    if (!state.running || recentlyHandledByHardware()) return;
+    for (const ch of v) handleKey(ch);
   });
 
   // Keep the soft keyboard up: refocus when the user taps elsewhere.
@@ -412,7 +424,7 @@
     try { keyInput.focus({ preventScroll: true }); } catch (_) { keyInput.focus(); }
   }
   document.addEventListener('touchend', e => {
-    if (e.target.closest('button')) return; // don't steal taps from buttons
+    if (e.target.closest('button')) return;
     focusKeyInput();
   });
   document.addEventListener('click', e => {
